@@ -1,0 +1,83 @@
+{% extends 'layout.html' %}
+{% block content %}
+<div class="col">
+    <!-- Flashcard Upload Form -->
+    <div class="row mb-4">
+        <form method="POST" action="" enctype="multipart/form-data" class="p-3 border rounded shadow-sm bg-light">
+            {{ form.hidden_tag() }}
+            <div class="row align-items-center gx-3">
+                <div class="col-auto">
+                    {% if form.picture.errors %}
+                        {{ form.picture(class="form-control-file is-invalid") }}
+                        {% for error in form.picture.errors %}
+                            <span class="text-danger">{{ error }}</span><br>
+                        {% endfor %}
+                    {% else %}
+                        {{ form.picture(class="form-control-file") }}
+                    {% endif %}
+                </div>
+                <div class="col">
+                    {% if form.title.errors %}
+                        {{ form.title(class="form-control is-invalid", placeholder="Insert title") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.title.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form.title(class="form-control", placeholder="Insert title") }}
+                    {% endif %}
+                </div>
+                <div class="col-auto">
+                    {{ form.submit(class="btn btn-outline-info") }}
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Current Flashcard Display -->
+    {% if current_flashcard %}
+    <div class="image-section">
+        <h2>{{ current_flashcard.title }}</h2>
+        <div id="image-container">
+            <img src="{{ url_for('static', filename=directory_path + current_flashcard.image_file) }}" id="uploaded-image" alt="{{ current_flashcard.title }}">
+        </div>
+        <script id="grouped-boxes-data" type="application/json">{{ current_flashcard.boxes_cords | tojson | safe }}</script>
+    {% endif %}
+
+    <!-- Flashcard Gallery -->
+    <div class="container mt-4">
+        <h2 class="text-center mb-4">Moje Fiszki</h2>
+        <div class="row">
+            {% for flashcard in flashcards %}
+            <div class="col-md-3 col-sm-6 mb-3">
+                <div class="card shadow-sm h-100 position-relative">
+                    <form 
+                        action="{{ url_for('flashcard_delete', flashcard_id=flashcard.id, directory_id=flashcard.directory_id) }}" 
+                        method="POST" 
+                        class="position-absolute" 
+                        style="top: 10px; right: 10px;">
+                        <button type="submit" class="btn flashcard-remove-btn btn-sm p-1 rounded-circle" title="Delete">
+                            &times;
+                        </button>
+                    </form>
+                    <div class="image-wrapper">
+                        <a href="{{ url_for('flashcard', flashcard_id=flashcard.id, directory_id=flashcard.directory_id) }}">
+                            <img 
+                                src="{{ url_for('static', filename=directory_path + flashcard.image_file) }}" 
+                                class="card-img-top" 
+                                alt="Flashcard Image">
+                        </a>
+                    </div>
+                    <div class="card-body d-flex flex-column justify-content-between text-center">
+                        {% if flashcard.title %}
+                        <h5 class="card-title">{{ flashcard.title }}</h5>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock content %}
