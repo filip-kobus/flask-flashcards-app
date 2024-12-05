@@ -140,8 +140,6 @@ class VisionAI:
             while j < size:
                 next_card = flashcards[j]
 
-                # if cards are on the same level and are apart more than threshold,
-                # no point in further searching for connections (cards are sorted horizontally)
                 if abs(next_card.bottom - card.bottom) < height_diff:
                     if abs(next_card.left - card.right) < horizontal_threshold:
                         card.connect_flashcards(next_card)

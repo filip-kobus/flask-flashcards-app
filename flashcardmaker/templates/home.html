@@ -1,11 +1,8 @@
 {% extends 'layout.html' %}
 {% block content %}
-    <div style="position: relative; width: 100%; height: 0; padding-bottom: 56.25%;">
-        <iframe 
-            src="https://www.youtube.com/embed/tgbNymZ7vqY" 
-            style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;" 
-            frameborder="0" 
-            allowfullscreen>
-        </iframe>
+    <div class="content-section col-12 col-md-6 col-lg-6 mx-auto">
+        <a href="{{ url_for('directories') }}">
+            <h1 class="account-heading">Go To Flashcards</h1>
+        </a>
     </div>
 {% endblock content %}

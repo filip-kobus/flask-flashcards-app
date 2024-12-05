@@ -1,6 +1,6 @@
-from flashcardmaker import db, login_manager
+from flashcardmaker import db, login_manager, app
 from flask_login import UserMixin
-
+from itsdangerous.url_safe import URLSafeTimedSerializer as Serializer
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -13,6 +13,19 @@ class User(db.Model, UserMixin):
     image_file = db.Column(db.String(20), nullable=False, default='default.jpg')
     password = db.Column(db.String(60), nullable=False)
     directories = db.relationship('Directory', lazy=True)
+
+    def get_reset_token(self):
+        s = Serializer(app.config['SECRET_KEY'])
+        return s.dumps({'user_id': self.id})
+
+    @staticmethod
+    def verify_reset_token(token):
+        s = Serializer(app.config['SECRET_KEY'])
+        try:
+            user_id = s.loads(token)['user_id']
+        except:
+            return None
+        return User.query.get(user_id)
 
     def __repr__(self):
         return f"User('{self.username}, {self.email}, {self.directories}')"

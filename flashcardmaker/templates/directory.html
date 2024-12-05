@@ -2,11 +2,11 @@
 {% block content %}
 <div class="col">
     <!-- Flashcard Upload Form -->
-    <div class="row mb-4">
+    <div class="col-12 col-md-8 col-lg-8 mx-auto">
         <form method="POST" action="" enctype="multipart/form-data" class="p-3 border rounded shadow-sm bg-light">
             {{ form.hidden_tag() }}
-            <div class="row align-items-center gx-3">
-                <div class="col-auto">
+            <div class="row align-items-center">
+                <div class="col">
                     {% if form.picture.errors %}
                         {{ form.picture(class="form-control-file is-invalid") }}
                         {% for error in form.picture.errors %}
@@ -46,8 +46,8 @@
     {% endif %}
 
     <!-- Flashcard Gallery -->
-    <div class="container mt-4">
-        <h2 class="text-center mb-4">Moje Fiszki</h2>
+    <div class="container mt-5">
+        <h2 class="text-center mb-4">My Flashcards</h2>
         <div class="row">
             {% for flashcard in flashcards %}
             <div class="col-md-3 col-sm-6 mb-3">
@@ -80,4 +80,6 @@
         </div>
     </div>
 </div>
+<!-- Include External JavaScript File -->
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
 {% endblock content %}

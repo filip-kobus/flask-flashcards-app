@@ -1,6 +1,6 @@
 {% extends 'layout.html' %}
 {% block content %}
-    <div class="content-section">
+    <div class="content-section col-12 col-md-6 col-lg-6 mx-auto">
         <form method="POST" action="">
             {{ form.hidden_tag() }}
             <fieldset class="form-group">
@@ -33,6 +33,9 @@
                 </div>
                 <div class="form-group">
                     {{ form.submit(class="btn btn-outline-info") }}
+                    <small class="text-muted">
+                        Forgot your password? <a class="ml-2" href="{{ url_for('reset_request') }}">Reset Password</a>
+                    </small>
                 </div>
                 <div class="form-check">
                     {{ form.remember(class="form-check-input") }}
@@ -41,7 +44,7 @@
             </fieldset>
         </form>
     </div>
-    <div class="border-top pt-3">
+    <div class="border-top pt-3 col-6 mx-auto">
         <small class="text-muted">
             Don't have account? <a class="ml-2" href="{{ url_for('register') }}">Sign In</a>
         </small>

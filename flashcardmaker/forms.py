@@ -68,7 +68,9 @@ class AddDirectoryForm(FlaskForm):
         
 
 class AddFlashcardForm(FlaskForm):
-    directory_id = None
+    def __init__(self, directory_id):
+        super().__init__()
+        self._directory_id = directory_id
 
     title = StringField('Flashcard title',
                             validators=[DataRequired(), Length(min=2, max=20)])
@@ -78,10 +80,20 @@ class AddFlashcardForm(FlaskForm):
     
     submit = SubmitField('Add')
 
-    def set_directory_id(self, id):
-        self.directory_id = id
-
     def validate_title(self, title):
-        flashcard = Flashcard.query.filter_by(directory_id=self.directory_id, title=title.data).first()
+        flashcard = Flashcard.query.filter_by(directory_id=self._directory_id, title=title.data).first()
         if flashcard:
-            raise ValidationError('This flashcard with this name already exists.')
+            raise ValidationError('Flashcard with this name already exists.')
+        
+
+class RequestResetForm(FlaskForm):
+    email = StringField('Email', 
+                        validators=[DataRequired(), Email()])
+    submit = SubmitField('Request Password Reset')
+
+
+class ResetPasswordForm(FlaskForm):
+    password = PasswordField('Password', validators=[DataRequired()])
+    confirm_password = PasswordField('Confirm Password',
+                                     validators=[DataRequired(), EqualTo('password')])
+    submit = SubmitField('Reset Password')

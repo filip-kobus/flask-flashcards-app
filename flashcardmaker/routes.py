@@ -1,10 +1,12 @@
 from flask import render_template, redirect, flash, url_for, request
-from flashcardmaker import app, bcrypt, db
-from flashcardmaker.forms import RegistrationForm, LoginForm, UpdateAccountForm, AddDirectoryForm, AddFlashcardForm
+from flashcardmaker import app, bcrypt, db, mail
+from flashcardmaker.forms import (RegistrationForm, LoginForm, UpdateAccountForm, AddDirectoryForm, 
+                                  AddFlashcardForm, RequestResetForm, ResetPasswordForm)
 from flashcardmaker.models import User, Directory, Flashcard
 from flask_login import login_user, logout_user, current_user, login_required
 from flashcardmaker.directories import UserDir
-from flashcardmaker.vision import VisionAi
+from flashcardmaker.vision import VisionAI
+from flask_mail import Message
 import os
 
 
@@ -95,32 +97,34 @@ def directory_delete(directory_id):
 
 @app.route("/directories/<int:directory_id>", methods=["GET", "POST"])
 def directory(directory_id):
-    form = AddFlashcardForm()
-    form.set_directory_id(directory_id)
+    form = AddFlashcardForm(directory_id)
     directory = Directory.query.get_or_404(directory_id)
     directory_path = "users/" + current_user.username + "/" + directory.name + "/"
     if form.validate_on_submit():
         user_dir = UserDir()
-        vision = 
         filename = user_dir.add_flashcard(directory.name, form.picture.data, form.title.data)
-        flashcard = Flashcard(title=form.title.data, image_file=filename, boxes_cords={}, directory_id=directory_id)
+        image_path =  "flashcardmaker/static/" + directory_path + "/" + filename
+        vision = VisionAI(image_path)
+        flashcard = Flashcard(title=form.title.data, image_file=filename, boxes_cords=vision.grouped_boxes, directory_id=directory_id)
         db.session.add(flashcard)
         db.session.commit()
     return render_template('directory.html', title=directory.name, flashcards=directory.flashcards, form=form, directory_path=directory_path, current_flashcard=None)
 
 @app.route("/directories/<int:directory_id>/<int:flashcard_id>", methods=["GET", "POST"])
 def flashcard(directory_id, flashcard_id):
-    form = AddFlashcardForm()
-    form.set_directory_id(directory_id)
+    form = AddFlashcardForm(directory_id)
     directory = Directory.query.get_or_404(directory_id)
     flashcard = Flashcard.query.get_or_404(flashcard_id)
     directory_path = "users/" + current_user.username + "/" + directory.name + "/"
     if form.validate_on_submit():
         user_dir = UserDir()
         filename = user_dir.add_flashcard(directory.name, form.picture.data, form.title.data)
-        flashcard = Flashcard(title=form.title.data, image_file=filename, boxes_cords={}, directory_id=directory_id)
+        image_path =  "flashcardmaker/static/" + directory_path + "/" + filename
+        vision = VisionAI(image_path)
+        flashcard = Flashcard(title=form.title.data, image_file=filename, boxes_cords=vision.grouped_boxes, directory_id=directory_id)
         db.session.add(flashcard)
         db.session.commit()
+        
     return render_template('directory.html', title=directory.name, flashcards=directory.flashcards, form=form, directory_path=directory_path,  current_flashcard=flashcard)
 
 @app.route("/directories/<int:directory_id>/<int:flashcard_id>/delete", methods=["GET", "POST"])
@@ -133,3 +137,47 @@ def flashcard_delete(directory_id, flashcard_id):
     db.session.commit()
 
     return redirect(url_for('directory', directory_id=directory_id))
+
+def send_reset_email(user):
+    token = user.get_reset_token()
+    msg = Message('Password Reset Request',
+                  sender='filipkr204@gmail.com',
+                  recipients=[user.email])
+    msg.body = f''' To reset your password, visit following link:
+{url_for('reset_token', token=token, _external=True)}
+
+If you did not make this request then simply ignore this email
+'''
+    mail.send(msg)
+
+@app.route("/reset_password", methods=['GET', 'POST'])
+def reset_request():
+    if current_user.is_authenticated:
+        return redirect(url_for('home'))
+    form = RequestResetForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(email=form.email.data).first()
+        if user:
+            send_reset_email(user)
+        flash('If account with this email exists, email was sent', 'success')
+        return redirect(url_for('login'))
+    return render_template('reset_request.html', title='Reset Password', form=form)
+
+@app.route("/reset_password/<token>", methods=['GET', 'POST'])
+def reset_token(token):
+    if current_user.is_authenticated:
+        return redirect(url_for('home'))
+    user = User.verify_reset_token(token)
+    if user is None:
+        flash('That is an invalid or expired token', 'warning')
+        return redirect(url_for('reset_request'))
+    form = ResetPasswordForm()
+    if form.validate_on_submit():
+        hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf8')
+        user.password = hashed_password
+        db.session.add(user)
+        db.session.commit()
+        flash(f'Password succesfuly changed', 'success')
+        return redirect(url_for('home'))
+
+    return render_template('reset_token.html', title='Reset Password', form=form)

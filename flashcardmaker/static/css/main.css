@@ -23,7 +23,7 @@ body {
   .site-header .navbar-nav .nav-link.active {
     font-weight: 500;
   }
-  
+
   .content-section {
     background: #ffffff;
     padding: 10px 20px;
@@ -147,4 +147,24 @@ body {
   max-width: 100%;
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.bounding-box {
+  position: absolute;
+  border: 2px dashed #ffffff4d;
+  outline: 2px solid rgb(212, 213, 202, 0.5); /* Simulates padding visually */
+  background-color: rgb(212, 213, 202);
+  cursor: pointer;
+  transition: opacity 0.3s, background-color 0.3s;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.bounding-box.hidden {
+  opacity: 0;
+}
+
+.bounding-box:hover {
+  background-color: rgb(212, 213, 202);
+  border-color: #0000001a;
 }
