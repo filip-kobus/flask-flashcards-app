@@ -28,7 +28,7 @@ logs/
 *.pyc
 
 # Ignore static and media uploads (optional)
-static/users/
+flashcardmaker/static/users/
 
 # Ignore database instance
 instance/
