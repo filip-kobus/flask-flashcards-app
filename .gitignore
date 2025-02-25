@@ -28,5 +28,7 @@ logs/
 *.pyc
 
 # Ignore static and media uploads (optional)
-static/uploads/
-media/
+static/users/
+
+# Ignore database instance
+instance/
