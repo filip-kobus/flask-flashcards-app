@@ -62,12 +62,7 @@ def account():
         form.username.data = current_user.username
         form.email.data = current_user.email
 
-    if current_user.image_filename:
-        image_file = user_dir.get_account_picture(current_user.image_filename)
-    else:
-        image_file = url_for('static', filename='default.jpg')
-
-    print("DEBUG: Image URL ->", image_file)
+    image_file = user_dir.get_account_picture(current_user.image_filename)
 
     return render_template('account.html', title='Account', image_file=image_file, form=form)
 

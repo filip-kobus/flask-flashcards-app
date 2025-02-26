@@ -8,22 +8,19 @@ from utils import bucket_manager, encryptor
 
 class UserDir:
     PROFILE_PICTURES_FOLDER = "profile-pictures"
+    FLASHCARDS_FOLDER = "flashcards"
 
     def __init__(self):
-        self.user_path = os.path.join(app.root_path, 'static/users', current_user.username)
+        self.user = os.path.join(app.root_path, 'static/users', current_user.username)
 
     def create_directory(self, directory):
-        dir_path = os.path.join(self.user_path, directory)
-        if not os.path.exists(dir_path):
-            os.makedirs(dir_path)
+        path = f"{self.FLASHCARDS_FOLDER}/{current_user.username}/{directory}/"
+        bucket_manager.create_s3_folder(path)
 
     def remove_directory(self, directory):
-        dir_path = os.path.join(self.user_path, directory)
-        if os.path.exists(dir_path):
-            if len(os.listdir(dir_path)) == 0:
-                os.rmdir(dir_path)
-            else:
-                raise Exception("Directory must be empty")
+        path = f"{self.FLASHCARDS_FOLDER}/{current_user.username}/{directory}/"
+        if not bucket_manager.remove_empty_s3_folder(path):
+            raise Exception("Directory must be empty")
             
     def add_flashcard(self, directory, picture, name):
         _, f_ext = os.path.splitext(picture.filename)
