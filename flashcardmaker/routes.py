@@ -49,20 +49,25 @@ def logout():
 @login_required
 def account():
     form = UpdateAccountForm()
+    user_dir = UserDir()
     if form.validate_on_submit():
         current_user.username = form.username.data
         current_user.email = form.email.data
         if form.picture.data:
-            user_dir = UserDir()
             new_picture = user_dir.save_account_picture(form.picture.data)
-            current_user.image_file = new_picture
+            current_user.image_filename = new_picture
         db.session.commit()
         flash(f'Account updated!', 'success')
     elif request.method == "GET":
         form.username.data = current_user.username
         form.email.data = current_user.email
 
-    image_file = url_for('static', filename='profile_picture/' + current_user.image_file)
+    if current_user.image_filename:
+        image_file = user_dir.get_account_picture(current_user.image_filename)
+    else:
+        image_file = url_for('static', filename='default.jpg')
+
+    print("DEBUG: Image URL ->", image_file)
 
     return render_template('account.html', title='Account', image_file=image_file, form=form)
 
