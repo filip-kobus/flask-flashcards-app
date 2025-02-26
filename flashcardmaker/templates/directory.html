@@ -40,9 +40,10 @@
     <div class="image-section">
         <h2>{{ current_flashcard.title }}</h2>
         <div id="image-container">
-            <img src="{{ url_for('static', filename=directory_path + current_flashcard.image_file) }}" id="uploaded-image" alt="{{ current_flashcard.title }}">
+            <img src="{{ current_flashcard.signed_image_url }}" id="uploaded-image" alt="{{ current_flashcard.title }}">
         </div>
         <script id="grouped-boxes-data" type="application/json">{{ current_flashcard.boxes_cords | tojson | safe }}</script>
+    </div>
     {% endif %}
 
     <!-- Flashcard Gallery -->
@@ -64,7 +65,7 @@
                     <div class="image-wrapper">
                         <a href="{{ url_for('flashcard', flashcard_id=flashcard.id, directory_id=flashcard.directory_id) }}">
                             <img 
-                                src="{{ url_for('static', filename=directory_path + flashcard.image_file) }}" 
+                                src="{{flashcard.signed_image_url}}"
                                 class="card-img-top" 
                                 alt="Flashcard Image">
                         </a>

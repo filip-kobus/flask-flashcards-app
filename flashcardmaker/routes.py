@@ -62,7 +62,8 @@ def account():
         form.username.data = current_user.username
         form.email.data = current_user.email
 
-    image_file = user_dir.get_account_picture(current_user.image_filename)
+    image_file = user_dir.get_account_picture_url(current_user.image_filename)
+    print(image_file)
 
     return render_template('account.html', title='Account', image_file=image_file, form=form)
 
@@ -99,33 +100,66 @@ def directory_delete(directory_id):
 def directory(directory_id):
     form = AddFlashcardForm(directory_id)
     directory = Directory.query.get_or_404(directory_id)
-    directory_path = "users/" + current_user.username + "/" + directory.name + "/"
     if form.validate_on_submit():
         user_dir = UserDir()
-        filename = user_dir.add_flashcard(directory.name, form.picture.data, form.title.data)
-        image_path =  "flashcardmaker/static/" + directory_path + "/" + filename
-        vision = VisionAI(image_path)
+        filename = user_dir.add_flashcard(directory.name, form.picture.data)
+        form.picture.data.seek(0)
+        vision = VisionAI(form.picture.data.read())
         flashcard = Flashcard(title=form.title.data, image_file=filename, boxes_cords=vision.grouped_boxes, directory_id=directory_id)
         db.session.add(flashcard)
         db.session.commit()
-    return render_template('directory.html', title=directory.name, flashcards=directory.flashcards, form=form, directory_path=directory_path, current_flashcard=None)
+
+    flashcards_with_urls = get_url_for_flashcards_gallery(directory)
+    return render_template('directory.html', title=directory.name, flashcards=flashcards_with_urls, form=form, current_flashcard=None)
+
+def get_url_for_flashcards_gallery(directory):
+    user_dir = UserDir()
+    flashcards_with_urls = []
+    for flashcard in directory.flashcards:
+        url = user_dir.get_flashcard_url(directory.name, flashcard.image_file)
+        flashcards_with_urls.append({
+            "id": flashcard.id,
+            "title": flashcard.title,
+            "signed_image_url": url,
+            "image_file": flashcard.image_file,
+            "boxes_cords": flashcard.boxes_cords,
+            "directory_id": flashcard.directory_id
+        })
+    
+    return flashcards_with_urls
+
+def get_url_for_main_flashcard(directory, flashcard):
+    user_dir = UserDir()
+    url = user_dir.get_flashcard_url(directory.name, flashcard.image_file)
+    flashcard_with_url = {
+            "id": flashcard.id,
+            "title": flashcard.title,
+            "signed_image_url": url,
+            "image_file": flashcard.image_file,
+            "boxes_cords": flashcard.boxes_cords,
+            "directory_id": flashcard.directory_id
+        }
+    
+    return flashcard_with_url
 
 @app.route("/directories/<int:directory_id>/<int:flashcard_id>", methods=["GET", "POST"])
 def flashcard(directory_id, flashcard_id):
     form = AddFlashcardForm(directory_id)
     directory = Directory.query.get_or_404(directory_id)
     flashcard = Flashcard.query.get_or_404(flashcard_id)
-    directory_path = "users/" + current_user.username + "/" + directory.name + "/"
+    flashcards_with_urls = get_url_for_flashcards_gallery(directory)
+    user_dir = UserDir()
+
     if form.validate_on_submit():
-        user_dir = UserDir()
-        filename = user_dir.add_flashcard(directory.name, form.picture.data, form.title.data)
-        image_path =  "flashcardmaker/static/" + directory_path + "/" + filename
-        vision = VisionAI(image_path)
+        filename = user_dir.add_flashcard(directory.name, form.picture.data)
+        form.picture.data.seek(0)
+        vision = VisionAI(form.picture.data.read())
         flashcard = Flashcard(title=form.title.data, image_file=filename, boxes_cords=vision.grouped_boxes, directory_id=directory_id)
         db.session.add(flashcard)
         db.session.commit()
-        
-    return render_template('directory.html', title=directory.name, flashcards=directory.flashcards, form=form, directory_path=directory_path,  current_flashcard=flashcard)
+    flashcard_with_url = get_url_for_main_flashcard(directory, flashcard)
+
+    return render_template('directory.html', title=directory.name, flashcards=flashcards_with_urls, form=form, current_flashcard=flashcard_with_url)
 
 @app.route("/directories/<int:directory_id>/<int:flashcard_id>/delete", methods=["GET", "POST"])
 def flashcard_delete(directory_id, flashcard_id):

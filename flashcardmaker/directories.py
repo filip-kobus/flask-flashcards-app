@@ -21,38 +21,44 @@ class UserDir:
         path = f"{self.FLASHCARDS_FOLDER}/{current_user.username}/{directory}/"
         if not bucket_manager.remove_empty_s3_folder(path):
             raise Exception("Directory must be empty")
+
+    def add_flashcard(self, directory, picture):
+        image, image_name = self.prepare_image(picture)
+        path = f"{self.FLASHCARDS_FOLDER}/{current_user.username}/{directory}/{image_name}"
+        bucket_manager.upload_to_s3(image, path)
+
+        return image_name
+
+    def remove_flashcard(self, directory, flashcard_name):
+        path = f"{self.FLASHCARDS_FOLDER}/{current_user.username}/{directory}/{flashcard_name}"
+        bucket_manager.remove_from_s3(path)
             
-    def add_flashcard(self, directory, picture, name):
-        _, f_ext = os.path.splitext(picture.filename)
-        filename = name + f_ext
-        flashcard_path = os.path.join(self.user_path, directory, filename)
-        picture.save(flashcard_path)
-
-        return filename
-
-    def remove_flashcard(self, directory, name):
-        flashcard_path = os.path.join(self.user_path, directory, name)
-        os.remove(flashcard_path)
+    def get_flashcard_url(self, directory, flashcard_name):
+        path = f"{self.FLASHCARDS_FOLDER}/{current_user.username}/{directory}/{flashcard_name}"
+        return bucket_manager.get_presigned_url(path)
 
     def save_account_picture(self, picture):
         current_picture = current_user.image_filename
         if current_picture != "default.jpg":
-            bucket_manager.remove_from_s3(self.PROFILE_PICTURES_FOLDER, current_picture)
+            path = f"{self.PROFILE_PICTURES_FOLDER}/{current_user.image_filename}"
+            bucket_manager.remove_from_s3(path)
 
-        image, image_name = self.prepare_profile_picture(picture)
-        bucket_manager.upload_to_s3(image, self.PROFILE_PICTURES_FOLDER, image_name)
+        image, image_name = self.prepare_image(picture)
+        path = f"{self.PROFILE_PICTURES_FOLDER}/{image_name}"
+        bucket_manager.upload_to_s3(image, path)
 
         return image_name
 
-    def prepare_profile_picture(self, picture):
+    def prepare_image(self, picture, resize=False, hash_name=False):
         """Resizes picture to 125x125 and encrypts filename"""
         _, f_ext = os.path.splitext(picture.filename)
         image_format = f_ext[1:].upper()
         picture_fn = encryptor.generate_uuid_filename(extension=f_ext)
         
-        output_size = (125, 125)
         i = Image.open(picture)
-        i.thumbnail(output_size)
+        if resize:
+            output_size = (125, 125)
+            i.thumbnail(output_size)
 
         if image_format == "JPG":
             image_format = "JPEG"
@@ -63,5 +69,6 @@ class UserDir:
 
         return image_buffer, picture_fn
 
-    def get_account_picture(self, filename):
-        return bucket_manager.get_presigned_url(self.PROFILE_PICTURES_FOLDER, filename)
+    def get_account_picture_url(self, filename):
+        path = f"{self.PROFILE_PICTURES_FOLDER}/{filename}"
+        return bucket_manager.get_presigned_url(path)
