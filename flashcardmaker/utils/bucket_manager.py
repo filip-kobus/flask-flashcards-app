@@ -1,12 +1,18 @@
 import boto3
 import os
 from flask import Response
-from botocore.config import Config
+from .config import AWSCredentials
 
 S3_BUCKET = "flashcards-app-bucket"
 
-s3 = boto3.client("s3",
-                  endpoint_url='https://s3.eu-central-1.amazonaws.com')
+s3 = boto3.client(
+    "s3",
+    endpoint_url='https://s3.eu-central-1.amazonaws.com',
+    aws_access_key_id=AWSCredentials.ACCESS_KEY,
+    aws_secret_access_key=AWSCredentials.SECRET_KEY,
+    region_name=AWSCredentials.REGION_NAME
+)
+
 
 def upload_to_s3(file, path):
     """Upload a file to an S3 bucket""" 
