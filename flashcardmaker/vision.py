@@ -52,8 +52,9 @@ class VisionAI:
     VERTICAl_SPACING_RATIO = 8 / 20
     HEIGHT_DIFFERENCE_RATIO = 6 / 20
     ARTIFACTS = ['ebrary', 'F.Netter']
+    CLIENT_PATH = 'keys/client_file.json'
 
-    def __init__(self, image, client_path='../keys/client_file.json'):
+    def __init__(self, image, client_path=CLIENT_PATH):
         self.image = image
         os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = client_path
         self.client = vision.ImageAnnotatorClient()
