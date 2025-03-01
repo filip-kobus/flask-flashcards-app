@@ -4,7 +4,7 @@ import secrets
 from flashcardmaker import app
 from PIL import Image
 from flask_login import current_user
-from utils import bucket_manager, encryptor
+from .utils import bucket_manager, encryptor
 
 class UserDir:
     PROFILE_PICTURES_FOLDER = "profile-pictures"

@@ -9,3 +9,5 @@ werkzeug
 Pillow
 Flask-Mail
 google-cloud-vision
+psycopg2-binary
+boto3

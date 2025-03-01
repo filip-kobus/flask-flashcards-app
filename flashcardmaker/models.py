@@ -10,7 +10,7 @@ class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(20), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
-    image_filename = db.Column(db.String(20), nullable=False, default='default.jpg')
+    image_filename = db.Column(db.String(50), nullable=False, default='default.jpg')
     password = db.Column(db.String(60), nullable=False)
     directories = db.relationship('Directory', lazy=True)
 
@@ -44,7 +44,7 @@ class Directory(db.Model):
 class Flashcard(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(30))
-    image_file = db.Column(db.String(20), nullable=False)
+    image_file = db.Column(db.String(50), nullable=False)
     boxes_cords = db.Column(db.PickleType)
     directory_id = db.Column(db.Integer, db.ForeignKey('directory.id'), nullable=False)
 
