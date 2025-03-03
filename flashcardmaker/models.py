@@ -66,6 +66,7 @@ class Flashcard(db.Model):
     image_file = db.Column(db.String(50), nullable=False)
     boxes_cords = db.Column(db.PickleType)
     directory_id = db.Column(db.Integer, db.ForeignKey('directory.id'), nullable=False)
+    temp_signed_url = db.Column(db.String(500), nullable=True)
 
     def __repr__(self):
         return f"Flashcards('{self.id},{self.directory_id} , {self.title}')"

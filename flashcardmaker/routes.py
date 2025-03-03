@@ -96,25 +96,26 @@ def directory_delete(directory_slug):
 def flashcards(directory_slug):
     directory = Directory.query.filter_by(slug=directory_slug).first_or_404()
     form = AddFlashcardForm(directory.id)
+
     if form.validate_on_submit():
         append_flashcard(directory, form)
 
-    flashcards_with_urls = get_url_for_flashcards_gallery(directory)
-    return render_template('flashcards.html', directory=directory, flashcards=flashcards_with_urls, form=form, current_flashcard=None)
+    update_signed_urls(directory)
+
+    return render_template('flashcards.html', directory=directory, form=form, current_flashcard=None)
 
 @app.route("/directories/<string:directory_slug>/<string:flashcard_filename>", methods=["GET", "POST"])
 def single_flashcard(directory_slug, flashcard_filename):
     directory = Directory.query.filter_by(slug=directory_slug).first_or_404()
-    flashcard = Flashcard.query.filter_by(image_file=flashcard_filename).first_or_404()
     form = AddFlashcardForm(directory.id)
-    flashcards_with_urls = get_url_for_flashcards_gallery(directory)
 
     if form.validate_on_submit():
         append_flashcard(directory, form)
-        
-    flashcard_with_url = get_url_for_main_flashcard(directory, flashcard)
 
-    return render_template('flashcards.html', directory=directory, flashcards=flashcards_with_urls, form=form, current_flashcard=flashcard_with_url)
+    update_signed_urls(directory)
+    flashcard = Flashcard.query.filter_by(image_file=flashcard_filename).first_or_404()
+
+    return render_template('flashcards.html', directory=directory, form=form, current_flashcard=flashcard)
 
 def append_flashcard(directory, form):
     image = form.picture.data
@@ -125,33 +126,10 @@ def append_flashcard(directory, form):
     db.session.add(flashcard)
     db.session.commit()
 
-def get_url_for_flashcards_gallery(directory):
-    flashcards_with_urls = []
+def update_signed_urls(directory):
     for flashcard in directory.flashcards:
         url = storage_manager.get_flashcard_url(directory.name, flashcard.image_file)
-        flashcards_with_urls.append({
-            "id": flashcard.id,
-            "title": flashcard.title,
-            "signed_image_url": url,
-            "image_file": flashcard.image_file,
-            "boxes_cords": flashcard.boxes_cords,
-            "directory_id": flashcard.directory_id
-        })
-    
-    return flashcards_with_urls
-
-def get_url_for_main_flashcard(directory, flashcard):
-    url = storage_manager.get_flashcard_url(directory.name, flashcard.image_file)
-    flashcard_with_url = {
-            "id": flashcard.id,
-            "title": flashcard.title,
-            "signed_image_url": url,
-            "image_file": flashcard.image_file,
-            "boxes_cords": flashcard.boxes_cords,
-            "directory_id": flashcard.directory_id
-        }
-    
-    return flashcard_with_url
+        flashcard.temp_signed_url = url
 
 @app.route("/directories/<string:directory_slug>/<string:flashcard_filename>/delete", methods=["GET", "POST"])
 def flashcard_delete(directory_slug, flashcard_filename):

@@ -40,7 +40,7 @@
     <div class="image-section">
         <h2>{{ current_flashcard.title }}</h2>
         <div id="image-container">
-            <img src="{{ current_flashcard.signed_image_url }}" id="uploaded-image" alt="{{ current_flashcard.title }}">
+            <img src="{{ current_flashcard.temp_signed_url }}" id="uploaded-image" alt="{{ current_flashcard.title }}">
         </div>
         <script id="grouped-boxes-data" type="application/json">{{ current_flashcard.boxes_cords | tojson | safe }}</script>
     </div>
@@ -50,7 +50,7 @@
     <div class="container mt-5">
         <h2 class="text-center mb-4">My Flashcards</h2>
         <div class="row">
-            {% for flashcard in flashcards %}
+            {% for flashcard in directory.flashcards %}
             <div class="col-md-3 col-sm-6 mb-3">
                 <div class="card shadow-sm h-100 position-relative">
                     <form 
@@ -65,7 +65,7 @@
                     <div class="image-wrapper">
                         <a href="{{ url_for('single_flashcard', flashcard_filename=flashcard.image_file, directory_slug=directory.slug) }}">
                             <img 
-                                src="{{flashcard.signed_image_url}}"
+                                src="{{flashcard.temp_signed_url}}"
                                 class="card-img-top" 
                                 alt="Flashcard Image">
                         </a>
