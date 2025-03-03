@@ -1,6 +1,8 @@
 from flashcardmaker import db, login_manager, app
 from flask_login import UserMixin
 from itsdangerous.url_safe import URLSafeTimedSerializer as Serializer
+from slugify import slugify
+
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -36,6 +38,23 @@ class Directory(db.Model):
     name = db.Column(db.String(30), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     flashcards = db.relationship('Flashcard', lazy=True)
+    slug = db.Column(db.String(120), unique=True, nullable=False)
+
+    def __init__(self, name, user_id):
+        self.name = name
+        self.slug = self.generate_unique_slug(name)
+        self.user_id = user_id
+
+    def generate_unique_slug(self, name):
+        base_slug = slugify(name)
+        unique_slug = base_slug
+        counter = 1
+
+        while Directory.query.filter_by(slug=unique_slug).first():
+            unique_slug = f"{base_slug}-{counter}"
+            counter += 1
+
+        return unique_slug
 
     def __repr__(self):
         return f"Directory('{self.id}, {self.name}, {self.flashcards}')"

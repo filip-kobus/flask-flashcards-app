@@ -61,15 +61,14 @@ def account():
         form.username.data = current_user.username
         form.email.data = current_user.email
 
-    image_file = storage_manager.get_account_picture_url(current_user.image_filename)
-    print(image_file)
+    profile_picture = storage_manager.get_account_picture_url(current_user.image_filename)
 
-    return render_template('account.html', title='Account', image_file=image_file, form=form)
+    return render_template('account.html', title='Account', image_file=profile_picture, form=form)
 
 @app.route("/directories", methods=["GET", "POST"])
 @login_required
 def directories():
-    image_file = url_for('static', filename='folder_icon.png')
+    folder_icon = url_for('static', filename='folder_icon.png')
     form = AddDirectoryForm()
     directories = current_user.directories
     if form.validate_on_submit():
@@ -79,11 +78,11 @@ def directories():
         db.session.commit()
         return redirect(url_for('directories'))
     return render_template('directories.html', title='My Flashcards',
-                           form=form, image_file=image_file, directories=directories)
+                           form=form, image_file=folder_icon, directories=directories)
 
-@app.route("/directories/<int:directory_id>/delete", methods=["GET", "POST"])
-def directory_delete(directory_id):
-    directory = Directory.query.get_or_404(directory_id)
+@app.route("/directories/<string:directory_slug>/delete", methods=["GET", "POST"])
+def directory_delete(directory_slug):
+    directory = Directory.query.filter_by(slug=directory_slug).first_or_404()
     try:
         storage_manager.remove_directory(directory.name)
         db.session.delete(directory)
@@ -93,20 +92,38 @@ def directory_delete(directory_id):
 
     return redirect(url_for('directories'))
 
-@app.route("/directories/<int:directory_id>", methods=["GET", "POST"])
-def directory(directory_id):
-    form = AddFlashcardForm(directory_id)
-    directory = Directory.query.get_or_404(directory_id)
+@app.route("/directories/<string:directory_slug>", methods=["GET", "POST"])
+def flashcards(directory_slug):
+    directory = Directory.query.filter_by(slug=directory_slug).first_or_404()
+    form = AddFlashcardForm(directory.id)
     if form.validate_on_submit():
-        filename = storage_manager.add_flashcard(directory.name, form.picture.data)
-        form.picture.data.seek(0)
-        vision = VisionAI(form.picture.data.read())
-        flashcard = Flashcard(title=form.title.data, image_file=filename, boxes_cords=vision.grouped_boxes, directory_id=directory_id)
-        db.session.add(flashcard)
-        db.session.commit()
+        append_flashcard(directory, form)
 
     flashcards_with_urls = get_url_for_flashcards_gallery(directory)
-    return render_template('directory.html', title=directory.name, flashcards=flashcards_with_urls, form=form, current_flashcard=None)
+    return render_template('flashcards.html', directory=directory, flashcards=flashcards_with_urls, form=form, current_flashcard=None)
+
+@app.route("/directories/<string:directory_slug>/<string:flashcard_filename>", methods=["GET", "POST"])
+def single_flashcard(directory_slug, flashcard_filename):
+    directory = Directory.query.filter_by(slug=directory_slug).first_or_404()
+    flashcard = Flashcard.query.filter_by(image_file=flashcard_filename).first_or_404()
+    form = AddFlashcardForm(directory.id)
+    flashcards_with_urls = get_url_for_flashcards_gallery(directory)
+
+    if form.validate_on_submit():
+        append_flashcard(directory, form)
+        
+    flashcard_with_url = get_url_for_main_flashcard(directory, flashcard)
+
+    return render_template('flashcards.html', directory=directory, flashcards=flashcards_with_urls, form=form, current_flashcard=flashcard_with_url)
+
+def append_flashcard(directory, form):
+    image = form.picture.data
+    filename = storage_manager.add_flashcard(directory.name, image)
+    image.seek(0)
+    vision = VisionAI(image.read())
+    flashcard = Flashcard(title=form.title.data, image_file=filename, boxes_cords=vision.grouped_boxes, directory_id=directory.id)
+    db.session.add(flashcard)
+    db.session.commit()
 
 def get_url_for_flashcards_gallery(directory):
     flashcards_with_urls = []
@@ -136,33 +153,15 @@ def get_url_for_main_flashcard(directory, flashcard):
     
     return flashcard_with_url
 
-@app.route("/directories/<int:directory_id>/<int:flashcard_id>", methods=["GET", "POST"])
-def flashcard(directory_id, flashcard_id):
-    form = AddFlashcardForm(directory_id)
-    directory = Directory.query.get_or_404(directory_id)
-    flashcard = Flashcard.query.get_or_404(flashcard_id)
-    flashcards_with_urls = get_url_for_flashcards_gallery(directory)
-
-    if form.validate_on_submit():
-        filename = storage_manager.add_flashcard(directory.name, form.picture.data)
-        form.picture.data.seek(0)
-        vision = VisionAI(form.picture.data.read())
-        flashcard = Flashcard(title=form.title.data, image_file=filename, boxes_cords=vision.grouped_boxes, directory_id=directory_id)
-        db.session.add(flashcard)
-        db.session.commit()
-    flashcard_with_url = get_url_for_main_flashcard(directory, flashcard)
-
-    return render_template('directory.html', title=directory.name, flashcards=flashcards_with_urls, form=form, current_flashcard=flashcard_with_url)
-
-@app.route("/directories/<int:directory_id>/<int:flashcard_id>/delete", methods=["GET", "POST"])
-def flashcard_delete(directory_id, flashcard_id):
-    directory = Directory.query.get_or_404(directory_id)
-    flashcard = Flashcard.query.get_or_404(flashcard_id)
-    storage_manager.remove_flashcard(directory.name, flashcard.image_file)
+@app.route("/directories/<string:directory_slug>/<string:flashcard_filename>/delete", methods=["GET", "POST"])
+def flashcard_delete(directory_slug, flashcard_filename):
+    directory = Directory.query.filter_by(slug=directory_slug).first_or_404()
+    flashcard = Flashcard.query.filter_by(image_file=flashcard_filename).first_or_404()
+    storage_manager.remove_flashcard(directory.name, flashcard_filename)
     db.session.delete(flashcard)
     db.session.commit()
 
-    return redirect(url_for('directory', directory_id=directory_id))
+    return redirect(url_for('flashcards', directory_slug=directory_slug))
 
 def send_reset_email(user):
     token = user.get_reset_token()
