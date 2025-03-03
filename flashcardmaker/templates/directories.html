@@ -6,7 +6,7 @@
         <div class="media-body row align-items-center">
             <div class="col-auto">
                 <a class="article-title" href="{{ url_for('flashcards', directory_slug=directory.slug) }}">
-                <img class="dir-img img-fluid" src="{{ image_file }}" alt="Flashcard Image">
+                <img class="dir-img img-fluid" src="{{ url_for('static', filename='images/folder_icon.png') }}" alt="Flashcard Image">
             </a>
         </div>
     
@@ -32,7 +32,7 @@
         <article class="media content-section">
             <div class="media-body row align-items-center">
             <div class="col-auto">
-                <img class="dir-img" src="{{ image_file }}" alt="Flashcard Image">
+                <img class="dir-img" src="{{ url_for('static', filename='images/folder_icon.png') }}" alt="Flashcard Image">
             </div>
             <div class="col">
                 <div class="row">

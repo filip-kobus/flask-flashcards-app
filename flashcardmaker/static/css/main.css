@@ -168,3 +168,38 @@ body {
   background-color: rgb(212, 213, 202);
   border-color: #0000001a;
 }
+
+.flashcard {
+  position: relative;
+  display: inline-block;
+}
+.toggle-box {
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 10px 20px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+.toggle-box.revealed {
+  background: rgba(255, 255, 255, 0.9);
+  color: black;
+}
+
+.step-img {
+  width: 80px;
+  height: 80px;
+  max-width: 100%;
+  margin-bottom: 10px;
+  filter: invert(20%) brightness(50%);
+}
+
+@media (max-width: 576px) { 
+  .step-img {
+      width: 60px;
+      height: 60px;
+  }
+}

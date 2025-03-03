@@ -14,6 +14,24 @@ import os
 def home():
     return render_template('home.html')
 
+@app.route("/demo")
+def demo():
+    bounding_boxes = [
+        [[1160, 160], [1250, 185]],
+        [[1158, 205], [1558, 240]],
+        [[24, 316], [359, 348]],
+        [[1166, 341], [1572, 424]],
+        [[23, 362], [423, 393]],
+        [[1159, 473], [1578, 558]],
+        [[25, 516], [219, 549]],
+        [[1160, 636], [1331, 663]],
+        [[25, 674], [262, 707]],
+        [[1161, 748], [1372, 775]],
+        [[24, 831], [422, 914]]
+    ]
+
+    return render_template("demo.html", bounding_boxes=bounding_boxes)
+
 @app.route("/register", methods=["GET", "POST"])
 def register():
     form = RegistrationForm()
@@ -68,7 +86,6 @@ def account():
 @app.route("/directories", methods=["GET", "POST"])
 @login_required
 def directories():
-    folder_icon = url_for('static', filename='folder_icon.png')
     form = AddDirectoryForm()
     directories = current_user.directories
     if form.validate_on_submit():
@@ -78,7 +95,7 @@ def directories():
         db.session.commit()
         return redirect(url_for('directories'))
     return render_template('directories.html', title='My Flashcards',
-                           form=form, image_file=folder_icon, directories=directories)
+                           form=form, directories=directories)
 
 @app.route("/directories/<string:directory_slug>/delete", methods=["GET", "POST"])
 def directory_delete(directory_slug):
@@ -122,6 +139,7 @@ def append_flashcard(directory, form):
     filename = storage_manager.add_flashcard(directory.name, image)
     image.seek(0)
     vision = VisionAI(image.read())
+    print(vision.grouped_boxes)
     flashcard = Flashcard(title=form.title.data, image_file=filename, boxes_cords=vision.grouped_boxes, directory_id=directory.id)
     db.session.add(flashcard)
     db.session.commit()
@@ -141,18 +159,6 @@ def flashcard_delete(directory_slug, flashcard_filename):
 
     return redirect(url_for('flashcards', directory_slug=directory_slug))
 
-def send_reset_email(user):
-    token = user.get_reset_token()
-    msg = Message('Password Reset Request',
-                  sender='filipkr204@gmail.com',
-                  recipients=[user.email])
-    msg.body = f''' To reset your password, visit following link:
-{url_for('reset_token', token=token, _external=True)}
-
-If you did not make this request then simply ignore this email
-'''
-    mail.send(msg)
-
 @app.route("/reset_password", methods=['GET', 'POST'])
 def reset_request():
     if current_user.is_authenticated:
@@ -165,6 +171,18 @@ def reset_request():
         flash('If account with this email exists, email was sent', 'success')
         return redirect(url_for('login'))
     return render_template('reset_request.html', title='Reset Password', form=form)
+
+def send_reset_email(user):
+    token = user.get_reset_token()
+    msg = Message('Password Reset Request',
+                  sender='filipkr204@gmail.com',
+                  recipients=[user.email])
+    msg.body = f''' To reset your password, visit following link:
+{url_for('reset_token', token=token, _external=True)}
+
+If you did not make this request then simply ignore this email
+'''
+    mail.send(msg)
 
 @app.route("/reset_password/<token>", methods=['GET', 'POST'])
 def reset_token(token):
