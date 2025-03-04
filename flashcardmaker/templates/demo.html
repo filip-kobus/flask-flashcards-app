@@ -5,7 +5,12 @@
     <div id="image-container">
         <img src="{{ url_for('static', filename='images/heart_diagram.png') }}" id="uploaded-image" alt="demo-img">
     </div>
+
     <script id="grouped-boxes-data" type="application/json">{{ bounding_boxes | tojson | safe }}</script>
 </div>
+
+<!-- External JavaScript file -->
 <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+
 {% endblock content %}
+

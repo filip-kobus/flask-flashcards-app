@@ -4,56 +4,65 @@
     {% for directory in directories %}
     <article class="media content-section">
         <div class="media-body row align-items-center">
+            <!-- Flashcard Folder Icon -->
             <div class="col-auto">
                 <a class="article-title" href="{{ url_for('flashcards', directory_slug=directory.slug) }}">
-                <img class="dir-img img-fluid" src="{{ url_for('static', filename='images/folder_icon.png') }}" alt="Flashcard Image">
-            </a>
-        </div>
-    
-        <div class="col text-start ps-3">
-            <h2 class="mb-0">
-                <a class="article-title text-decoration-none text-dark" href="{{ url_for('flashcards', directory_slug=directory.slug) }}">
-                    {{ directory.name }}
+                    <img class="dir-img img-fluid" src="{{ url_for('static', filename='images/folder_icon.png') }}" alt="Flashcard Image">
                 </a>
-            </h2>
-        </div>
+            </div>
+    
+            <!-- Directory Name -->
+            <div class="col text-start ps-3">
+                <h2 class="mb-0">
+                    <a class="article-title text-decoration-none text-dark" href="{{ url_for('flashcards', directory_slug=directory.slug) }}">
+                        {{ directory.name }}
+                    </a>
+                </h2>
+            </div>
         
-        <div class="col-auto ms-auto">
-            <form method="POST" action="{{ url_for('directory_delete', directory_slug=directory.slug) }}" enctype="multipart/form-data">
-                <input class="btn btn-danger btn-sm" type="submit" value="Delete">
-            </form>
-        </div>
-    </div>
-</article>
-{% endfor %}
-<form method="POST" enctype="multipart/form-data">
-    {{ form.hidden_tag() }}
-    <fieldset class="form-group">
-        <article class="media content-section">
-            <div class="media-body row align-items-center">
+            <!-- Delete Button (Unified with Submit) -->
             <div class="col-auto">
-                <img class="dir-img" src="{{ url_for('static', filename='images/folder_icon.png') }}" alt="Flashcard Image">
+                <form method="POST" action="{{ url_for('directory_delete', directory_slug=directory.slug) }}">
+                    <button class="btn btn-outline-danger btn-sm" type="submit">Delete</button>
+                </form>
             </div>
-            <div class="col">
-                <div class="row">
-                <div class="col-9">
-                    {% if form.name.errors %}
-                    {{ form.name(class="form-control is-invalid") }}
-                    <div class="invalid-feedback">
-                          {% for error in form.name.errors %}
-                              <span>{{ error }}</span>
-                          {% endfor %}
-                        </div>
-                  {% else %}
-                      {{ form.name(class="form-control") }}
-                      {% endif %}
+        </div>
+    </article>
+    {% endfor %}
+
+    <!-- Form for Creating New Folder -->
+    <form method="POST" enctype="multipart/form-data">
+        {{ form.hidden_tag() }}
+        <fieldset class="form-group">
+            <article class="media content-section">
+                <div class="media-body row align-items-center">
+                    <!-- Folder Icon -->
+                    <div class="col-auto">
+                        <img class="dir-img img-fluid" src="{{ url_for('static', filename='images/folder_icon.png') }}" alt="Folder icon">
                     </div>
-                <div class="col-3">
-                  {{ form.submit(class="btn btn-outline-info btn-block") }}
+
+                    <!-- Input Field (Aligned with Folder Name) -->
+                    <div class="col">
+                        {% if form.name.errors %}
+                        {{ form.name(class="form-control is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.name.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        {{ form.name(class="form-control") }}
+                        {% endif %}
+                    </div>
+
+                    <!-- Submit Button (Aligned with Delete Buttons) -->
+                    <div class="col-auto">
+                        <button class="btn btn-outline-info btn-sm" type="submit">Submit</button>
+                    </div>
                 </div>
-            </div>
-        </article>       
-    </fieldset>
-</form>
+            </article>       
+        </fieldset>
+    </form>
 </div>
+
 {% endblock content %}
