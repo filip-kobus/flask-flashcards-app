@@ -27,8 +27,8 @@ logs/
 # Ignore compiled Python files
 *.pyc
 
-# Ignore static and media uploads (optional)
-flashcardmaker/static/users/
-
-# Ignore database instance
-instance/
+/utils
+client_file.json
+webkey.ppk
+.elasticbeanstalk
+.ebignore

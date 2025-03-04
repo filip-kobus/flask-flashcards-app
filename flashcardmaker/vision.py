@@ -52,23 +52,17 @@ class VisionAI:
     VERTICAl_SPACING_RATIO = 8 / 20
     HEIGHT_DIFFERENCE_RATIO = 6 / 20
     ARTIFACTS = ['ebrary', 'F.Netter']
+    CLIENT_PATH = 'vision_api_keys/client_file.json'
 
-    def __init__(self, image_path, client_path='../keys/client_file.json'):
-        self.path = image_path
+    def __init__(self, image, client_path=CLIENT_PATH):
+        self.image = image
         os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = client_path
         self.client = vision.ImageAnnotatorClient()
         self.flashcards = self._create_flashcards()
         self.grouped_boxes = self._flashcards_to_boxes()
 
-    @staticmethod
-    def _open_image(path):
-        with io.open(path, 'rb') as image_file:
-            content = image_file.read()
-        return content
-
     def _retrieve_data(self):
-        content = self._open_image(self.path)
-
+        content = self.image
         image_vision = vision.Image(content=content)
         response = self.client.text_detection(image=image_vision)
         retrieved_data = response.text_annotations

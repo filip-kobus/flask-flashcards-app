@@ -1,8 +1,38 @@
 {% extends 'layout.html' %}
 {% block content %}
-    <div class="content-section col-12 col-md-6 col-lg-6 mx-auto">
-        <a href="{{ url_for('directories') }}">
-            <h1 class="account-heading">Go To Flashcards</h1>
-        </a>
+
+<div class="col-12 col-md-8 col-lg-6 mx-auto text-center mt-3 mb-5">
+    <h1 class="account-heading mb-4">Welcome to Diagram Flashcard Creator!</h1>
+    <p class="lead">Easily create interactive flashcards by uploading images. App will cover the image with toggleable boxes. You can reveal boxes and improve your learning.</p>
+
+    <a href="{{ url_for('demo') }}" class="btn btn-outline-info mb-5">Click here to try a Quick Demo</a>
+</div>
+
+<!-- How it Works Section -->
+<div class="container">
+    <h2 class="text-center account-heading mb-3">How It Works</h2>
+    <div class="row text-center">
+        <div class="col-md-4 mb-4 mt-4">
+            <img src="{{ url_for('static', filename='images/add-folder.png') }}" class="img-fluid step-img" alt="Upload an Image">
+            <h2>Step 1: Create folder</h2>
+            <p>Create folder for your flashcards.</p>
+        </div>
+        <div class="col-md-4 mb-4 mt-4">
+            <img src="{{ url_for('static', filename='images/upload-image.png') }}" class="img-fluid step-img" alt="Cover Text">
+            <h2>Step 2: Upload Image</h2>
+            <p>Upload image, program automatically places toggeable boxes on the image.</p>
+        </div>
+        <div class="col-md-4 mb-4 mt-4">
+            <img src="{{ url_for('static', filename='images/click.png') }}" class="img-fluid step-img" alt="Study & Learn">
+            <h2>Step 3: Study & Learn</h2>
+            <p>Click on the boxes to reveal text and test your knowledge!</p>
+        </div>
     </div>
+</div>
+
+<!-- Interactive Demo Section -->
+<div class="container text-center">
+    <h2><a href="{{ url_for('directories') }}" class="btn btn-outline-info">Upload your own flashcards</a></h2>
+</div>
+
 {% endblock content %}
