@@ -25,8 +25,9 @@ This project is a web-based Flashcard application that allows users to create, m
 
 ## Visuals
 <p align="center">
-  <img src="./static/gallery/dashboard.png" alt="Dashboard" width="45%"/>
-  <img src="./static/gallery/flashcards_view.png" alt="Flashcard View" width="45%"/>
+  <img src="https://github.com/user-attachments/assets/86ef640a-fe33-4449-bce6-4f33bc55efc7" alt="Dashboard"/>
+  <img src="https://github.com/user-attachments/assets/1f4940e5-680d-49df-b0a6-178a7c169080" alt="Flashcards"/>
+  <img src="https://github.com/user-attachments/assets/49334897-93e5-463f-becc-6b8eeca9e75c" alt="Flashcard View"/>
 </p>
 
 ## Installation
