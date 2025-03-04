@@ -30,7 +30,7 @@ def demo():
         [[24, 831], [422, 914]]
     ]
 
-    return render_template("demo.html", bounding_boxes=bounding_boxes)
+    return render_template("demo.html", bounding_boxes=bounding_boxes, title='Demo')
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
@@ -119,7 +119,7 @@ def flashcards(directory_slug):
 
     update_signed_urls(directory)
 
-    return render_template('flashcards.html', directory=directory, form=form, current_flashcard=None)
+    return render_template('flashcards.html', directory=directory, form=form, current_flashcard=None, title=directory.name)
 
 @app.route("/directories/<string:directory_slug>/<string:flashcard_filename>", methods=["GET", "POST"])
 def single_flashcard(directory_slug, flashcard_filename):
@@ -132,7 +132,7 @@ def single_flashcard(directory_slug, flashcard_filename):
     update_signed_urls(directory)
     flashcard = Flashcard.query.filter_by(image_file=flashcard_filename).first_or_404()
 
-    return render_template('flashcards.html', directory=directory, form=form, current_flashcard=flashcard)
+    return render_template('flashcards.html', directory=directory, form=form, current_flashcard=flashcard, title=flashcard.title)
 
 def append_flashcard(directory, form):
     image = form.picture.data
