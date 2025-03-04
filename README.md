@@ -8,10 +8,8 @@
 3. [Visuals](#visuals)
 4. [Installation](#installation)
 5. [Usage](#usage)
-6. [Project Structure](#project-structure)
-7. [Classes Overview](#classes-overview)
-8. [Documentation](#documentation)
-9. [License](#license)
+6. [Classes Overview](#classes-overview)
+7. [License](#license)
 
 ## Introduction
 This project is a web-based Flashcard application that allows users to create, manage, and study flashcards. The app features an interactive board where users can upload images, generate covering boxes, and toggle text visibility. The backend is built with Flask and AWS services.
