@@ -7,7 +7,7 @@ from flask_login import login_user, logout_user, current_user, login_required
 from flashcardmaker import storage_manager
 from flashcardmaker.vision import VisionAI
 from flask_mail import Message
-import os
+import os, json
 
 
 @app.route("/")
@@ -16,19 +16,10 @@ def home():
 
 @app.route("/demo")
 def demo():
-    bounding_boxes = [
-        [[1160, 160], [1250, 185]],
-        [[1158, 205], [1558, 240]],
-        [[24, 316], [359, 348]],
-        [[1166, 341], [1572, 424]],
-        [[23, 362], [423, 393]],
-        [[1159, 473], [1578, 558]],
-        [[25, 516], [219, 549]],
-        [[1160, 636], [1331, 663]],
-        [[25, 674], [262, 707]],
-        [[1161, 748], [1372, 775]],
-        [[24, 831], [422, 914]]
-    ]
+    json_path = os.path.join(app.root_path, 'static', 'utils', 'demo_boxes.json')
+
+    with open(json_path, "r") as file:
+        bounding_boxes = json.load(file)
 
     return render_template("demo.html", bounding_boxes=bounding_boxes, title='Demo')
 
