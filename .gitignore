@@ -28,6 +28,7 @@ logs/
 *.pyc
 
 /utils
-/keys
+client_file.json
+webkey.ppk
 .elasticbeanstalk
 .ebignore
